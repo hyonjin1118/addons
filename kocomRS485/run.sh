@@ -2,10 +2,8 @@
 
 SHARE_DIR=/share/kocom
 
-if [ ! -f $SHARE_DIR/rs485.py ]; then
-	mkdir $SHARE_DIR
-	mv /rs485.py $SHARE_DIR
-fi
+mkdir -p $SHARE_DIR
+cp /rs485.py $SHARE_DIR/rs485.py
 /makeconf.sh
 
 echo "[Info] Run Wallpad Controller"
