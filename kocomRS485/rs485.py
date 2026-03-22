@@ -497,7 +497,7 @@ class Kocom(rs485):
             device = DEVICE_FAN
             room = topic[2]
             try:
-                if command != 'mode':
+                if command == 'preset_mode':
                     self.wp_list[device][room]['speed']['set'] = payload
                     self.wp_list[device][room]['mode']['set'] = 'on'
                 elif command == 'mode':
@@ -507,7 +507,7 @@ class Kocom(rs485):
                 self.wp_list[device][room]['mode']['last'] = 'set'
                 ha_payload = {
                     'mode': self.wp_list[device][room]['mode']['set'],
-                    'speed': self.wp_list[device][room]['speed']['set']
+                    'preset_mode': self.wp_list[device][room]['speed']['set']
                 }
                 logger.info('[From HA]{}/{}/set = [mode={}, speed={}]'.format(device, room, self.wp_list[device][room]['mode']['set'], self.wp_list[device][room]['speed']['set']))
                 self.send_to_homeassistant(device, room, ha_payload)
@@ -622,13 +622,13 @@ class Kocom(rs485):
                 'name': '{}_{}_{}'.format(self._name, 'wallpad', DEVICE_FAN),
                 'cmd_t': '{}/{}/{}/mode'.format(HA_PREFIX, HA_FAN, 'wallpad'),
                 'stat_t': '{}/{}/{}/state'.format(HA_PREFIX, HA_FAN, 'wallpad'),
-                'spd_cmd_t': '{}/{}/{}/speed'.format(HA_PREFIX, HA_FAN, 'wallpad'),
-                'spd_stat_t': '{}/{}/{}/state'.format(HA_PREFIX, HA_FAN, 'wallpad'),
                 'stat_val_tpl': '{{ value_json.mode }}',
-                'spd_val_tpl': '{{ value_json.speed }}',
                 'pl_on': 'on',
                 'pl_off': 'off',
-                'spds': ['low', 'medium', 'high', 'off'],
+                'pr_mode_cmd_t': '{}/{}/{}/preset_mode'.format(HA_PREFIX, HA_FAN, 'wallpad'),
+                'pr_mode_stat_t': '{}/{}/{}/state'.format(HA_PREFIX, HA_FAN, 'wallpad'),
+                'pr_mode_val_tpl': '{{ value_json.preset_mode }}',
+                'pr_modes': ['low', 'medium', 'high'],
                 'uniq_id': '{}_{}_{}'.format(self._name, 'wallpad', DEVICE_FAN),
                 'device': {
                     'name': 'Kocom {}'.format('wallpad'),
@@ -640,8 +640,7 @@ class Kocom(rs485):
             }
             subscribe_list.append((ha_topic, 0))
             subscribe_list.append((ha_payload['cmd_t'], 0))
-            #subscribe_list.append((ha_payload['stat_t'], 0))
-            subscribe_list.append((ha_payload['spd_cmd_t'], 0))
+            subscribe_list.append((ha_payload['pr_mode_cmd_t'], 0))
             if remove:
                 publish_list.append({ha_topic : ''})
             else:
@@ -771,6 +770,12 @@ class Kocom(rs485):
             self.d_mqtt.publish("{}/{}/{}_{}/state".format(HA_PREFIX, HA_SWITCH, room, DEVICE_GAS), v_value)
             logger.info("[To HA]{}/{}/{}_{}/state = {}".format(HA_PREFIX, HA_SWITCH, room, DEVICE_GAS, v_value))
         elif device == DEVICE_FAN:
+            fan_state = value if type(value) == dict else json.loads(v_value)
+            ha_fan_value = {
+                'mode': fan_state.get('mode', 'off'),
+                'preset_mode': fan_state.get('preset_mode', fan_state.get('speed', 'off'))
+            }
+            v_value = json.dumps(ha_fan_value)
             self.d_mqtt.publish("{}/{}/{}/state".format(HA_PREFIX, HA_FAN, room), v_value)
             logger.info("[To HA]{}/{}/{}/state = {}".format(HA_PREFIX, HA_FAN, room, v_value))
 
