@@ -429,7 +429,10 @@ class Kocom(rs485):
                 chksum = self.check_sum(_payload.lower())
                 logger.info('[From HA]{} = {}({})'.format(_payload, chksum[0], chksum[1]))
         elif not self.kocom_scan:
-            self.parse_message(_topic, _payload)
+            if 'config' in _topic:
+                logger.debug('[From HA]Skip config message: {}'.format(msg.topic))
+            else:
+                self.parse_message(_topic, _payload)
             return
         logger.info("Message: {} = {}".format(msg.topic, _payload))
         
