@@ -950,7 +950,7 @@ class Kocom(rs485):
                                 for room, r_list in d_list.items():
                                     if type(r_list) == dict:
                                         if 'scan' in r_list and type(r_list['scan']) == dict and now - r_list['scan']['tick'] > SCAN_INTERVAL and ((device == DEVICE_FAN and self.wp_fan) or (device == DEVICE_GAS and self.wp_gas) or (device == DEVICE_LIGHT and self.wp_light) or (device == DEVICE_PLUG and self.wp_plug) or (device == DEVICE_THERMOSTAT and self.wp_thermostat)):
-                                            if now - r_list['scan']['last'] > 2:
+                                            if type(r_list['scan']['last']) != str and now - r_list['scan']['last'] > 2:
                                                 r_list['scan']['count'] += 1
                                                 r_list['scan']['last'] = now
                                                 self.set_serial(device, room, '', '', cmd='조회')
