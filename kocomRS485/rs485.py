@@ -745,7 +745,7 @@ class Kocom(rs485):
             self.d_mqtt.subscribe(subscribe_list)
         for ha in publish_list:
             for topic, payload in ha.items():
-                self.d_mqtt.publish(topic, payload)
+                self.d_mqtt.publish(topic, payload, retain=True)
         self.ha_registry = ha_topic
 
     def send_to_homeassistant(self, device, room, value):
