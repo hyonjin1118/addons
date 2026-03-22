@@ -1059,13 +1059,13 @@ class Kocom(rs485):
                     mode = self.wp_list[device][room]['mode']['set']
                     speed = self.wp_list[device][room]['speed']['set']
                     if mode == 'on':
-                        p_value += '1100'
+                        p_value += '1101'
+                        p_value += KOCOM_FAN_SPEED_REV.get(speed)
+                        p_value += '00000000000'
                     elif mode == 'off':
-                        p_value += '0001'
-                    p_value += KOCOM_FAN_SPEED_REV.get(speed)
-                    p_value += '00000000000'
+                        p_value += '0000000000000000'
                 except:
-                    logger.debug('[Make Packet] Error on DEVICE_THERMOSTAT')
+                    logger.debug('[Make Packet] Error on DEVICE_FAN')
         if p_value != '':
             packet = p_header + p_device + p_room + p_dst + p_cmd + p_value
             chk_sum = self.check_sum(packet)[1]
