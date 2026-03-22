@@ -18,6 +18,7 @@ import logging.handlers
 import configparser
 import paho.mqtt.client as mqtt
 from collections import OrderedDict
+import traceback
 
 # Version
 SW_VERSION = 'RS485 Compilation 1.0.3b'
@@ -975,7 +976,7 @@ class Kocom(rs485):
                                                         sub_v['last'] = 'set' 
                                                         sub_v['count'] += 1
                     except:
-                        logger.debug('[Scan]Error')
+                        logger.debug('[Scan]Error: {}'.format(traceback.format_exc()))
             if not self.connected:
                 logger.debug('[ERROR] 서버 연결이 끊어져 scan_list Thread를 종료합니다.')
                 break
